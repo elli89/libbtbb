@@ -1339,12 +1339,6 @@ int btbb_decode(btbb_packet* pkt)
 		rv =  btbb_decode_payload(pkt);
 	}
 
-	/* If we were successful, print the packet */
-	if(rv > 0) {
-		printf("Packet decoded with clock 0x%02x (rv=%d)\n", (pkt->clkn >> 1) & 0x3f, rv);
-		btbb_print_packet(pkt);
-	}
-
 	return rv;
 }
 

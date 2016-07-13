@@ -513,17 +513,9 @@ void try_hop(btbb_packet *pkt, btbb_piconet *pn)
 		pn->packets_observed++;
 		pn->total_packets_observed++;
 		btbb_winnow(pn);
-		if (btbb_piconet_get_flag(pn, BTBB_CLK27_VALID)) {
-			printf("got CLK1-27\n");
-			printf("clock offset = %d.\n", pn->clk_offset);
-		}
 	} else {
 		if (btbb_piconet_get_flag(pn, BTBB_CLK6_VALID)) {
 			btbb_uap_from_header(pkt, pn);
-			if (btbb_piconet_get_flag(pn, BTBB_CLK27_VALID)) {
-				printf("got CLK1-27\n");
-				printf("clock offset = %d.\n", pn->clk_offset);
-			}
 		} else {
 			if (btbb_uap_from_header(pkt, pn)) {
 				if (filter_uap == pn->UAP) {
@@ -546,8 +538,6 @@ void try_hop(btbb_packet *pkt, btbb_piconet *pn)
 /* reset UAP/clock discovery */
 static void reset(btbb_piconet *pn)
 {
-	//printf("no candidates remaining! starting over . . .\n");
-
 	if(btbb_piconet_get_flag(pn, BTBB_HOP_REVERSAL_INIT)) {
 		free(pn->clock_candidates);
 		pn->sequence = NULL;
@@ -597,14 +587,16 @@ static int channel_winnow(int offset, char channel, btbb_piconet *pn)
 		// Calculate clock offset for CLKN, not CLK1-27
 		pn->clk_offset = ((pn->clock_candidates[0]<<1) - (pn->first_pkt_time<<1));
 		printf("\nAcquired CLK1-27 = 0x%07x\n", pn->clock_candidates[0]);
+		printf("clock offset = %d.\n", pn->clk_offset);
 		btbb_piconet_set_flag(pn, BTBB_CLK27_VALID, 1);
 	}
 	else if (new_count == 0) {
+		printf("no candidates remaining! starting over . . .\n");
 		reset(pn);
 	}
-	//else {
-	//printf("%d CLK1-27 candidates remaining (channel=%d)\n", new_count, channel);
-	//}
+	else {
+		printf("%d CLK1-27 candidates remaining (channel=%d)\n", new_count, channel);
+	}
 
 	return new_count;
 }
@@ -725,8 +717,6 @@ int btbb_uap_from_header(btbb_packet *pkt, btbb_piconet *pn)
 
 	btbb_piconet_set_flag(pn, BTBB_GOT_FIRST_PACKET, 1);
 
-	//printf("reduced from %d to %d CLK1-6 candidates\n", starting, remaining);
-
 	if (remaining == 1) {
 		pn->clk_offset = (first_clock - (pn->first_pkt_time & 0x3f)) & 0x3f;
 		if (!btbb_piconet_get_flag(pn, BTBB_UAP_VALID))
@@ -740,6 +730,8 @@ int btbb_uap_from_header(btbb_packet *pkt, btbb_piconet *pn)
 		btbb_piconet_set_flag(pn, BTBB_UAP_VALID, 1);
 		pn->total_packets_observed = 0;
 		return 1;
+	} else {
+		printf("reduced from %d to %d CLK1-6 candidates\n", starting, remaining);
 	}
 
 	if (remaining == 0) {
@@ -874,10 +866,8 @@ int btbb_process_packet(btbb_packet *pkt, btbb_piconet *pn) {
 			btbb_packet_set_flag(pkt, BTBB_CLK6_VALID, 1);
 			btbb_packet_set_flag(pkt, BTBB_CLK27_VALID, 1);
 
-			if(btbb_decode(pkt))
-				btbb_print_packet(pkt);
-			else
-				printf("Failed to decode packet\n");
+			int rv = btbb_decode(pkt);
+			return rv;
 		}
 
 		/* Have LAP/UAP, need clocks. */
