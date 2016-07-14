@@ -508,7 +508,7 @@ void try_hop(btbb_packet *pkt, btbb_piconet *pn)
 	if (btbb_piconet_get_flag(pn, BTBB_HOP_REVERSAL_INIT)) {
 		//pn->winnowed = 0;
 		pn->pattern_indices[pn->packets_observed] =
-			pkt->clkn - pn->first_pkt_time;
+			(pkt->clkn >> 1) - pn->first_pkt_time;
 		pn->pattern_channels[pn->packets_observed] = pkt->channel;
 		pn->packets_observed++;
 		pn->total_packets_observed++;
@@ -652,16 +652,16 @@ int btbb_uap_from_header(btbb_packet *pkt, btbb_piconet *pn)
 
 	int starting = 0;
 	int remaining = 0;
-	uint32_t clkn = pkt->clkn;
+	uint32_t clk1 = pkt->clkn >> 1;
 
 	if (!btbb_piconet_get_flag(pn, BTBB_GOT_FIRST_PACKET))
-		pn->first_pkt_time = clkn;
+		pn->first_pkt_time = clk1;
 
 	// Set afh channel map
 	btbb_piconet_set_channel_seen(pn, pkt->channel);
 
 	if (pn->packets_observed < MAX_PATTERN_LENGTH) {
-		pn->pattern_indices[pn->packets_observed] = clkn - pn->first_pkt_time;
+		pn->pattern_indices[pn->packets_observed] = clk1 - pn->first_pkt_time;
 		pn->pattern_channels[pn->packets_observed] = pkt->channel;
 	} else {
 		printf("Oops. More hops than we can remember.\n");
@@ -677,16 +677,16 @@ int btbb_uap_from_header(btbb_packet *pkt, btbb_piconet *pn)
 		if (pn->clock6_candidates[count] > -1
 			|| !btbb_piconet_get_flag(pn, BTBB_GOT_FIRST_PACKET)) {
 			/* clock value for the current packet assuming count was the clock of the first packet */
-			int clock = (count + clkn - pn->first_pkt_time) % 64;
+			int clkn = ((count + clk1 - pn->first_pkt_time) % 64) << 1;
 			starting++;
-			UAP = try_clock(clock, pkt);
+			UAP = try_clock(clkn, pkt);
 			crc_chk = -1;
 
 			/* if this is the first packet: populate the candidate list */
 			/* if not: check CRCs if UAPs match */
 			if (!btbb_piconet_get_flag(pn, BTBB_GOT_FIRST_PACKET)
 				|| UAP == pn->clock6_candidates[count])
-				crc_chk = crc_check(clock, pkt);
+				crc_chk = crc_check(clkn, pkt);
 
 			if (btbb_piconet_get_flag(pn, BTBB_UAP_VALID) &&
 			    (UAP != pn->UAP))

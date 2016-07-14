@@ -119,6 +119,10 @@ void btbb_packet_set_data(btbb_packet *pkt,
 			  uint8_t channel, // Bluetooth channel 0-79
 			  uint32_t clkn);  // 312.5us clock (CLK27-0)
 
+void btbb_packet_set_symbols(btbb_packet* pkt, char* syms, int length);
+void btbb_packet_set_channel(btbb_packet* pkt, uint8_t channel);
+void btbb_packet_set_clkn(btbb_packet* pkt, uint32_t clkn);
+
 /* Get a pointer to packet symbols. */
 const char *btbb_get_symbols(const btbb_packet* pkt);
 

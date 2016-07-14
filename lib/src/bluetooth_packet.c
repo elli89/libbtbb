@@ -476,10 +476,33 @@ void btbb_packet_set_data(btbb_packet *pkt, char *data, int length,
 
 	pkt->length = length;
 	pkt->channel = channel;
-	pkt->clkn = clkn >> 1; // really CLK1
+	pkt->clkn = clkn;
 }
 
-void btbb_packet_set_flag(btbb_packet *pkt, int flag, int val)
+/* Copy data (symbols) into packet and set rx data. */
+void btbb_packet_set_symbols(btbb_packet* pkt, char* data, int length)
+{
+	int i;
+
+	if (length > MAX_SYMBOLS)
+		length = MAX_SYMBOLS;
+	for (i = 0; i < length; i++)
+		pkt->symbols[i] = data[i];
+
+	pkt->length = length;
+}
+
+void btbb_packet_set_channel(btbb_packet* pkt, uint8_t channel)
+{
+	pkt->channel = channel;
+}
+
+void btbb_packet_set_clkn(btbb_packet *pkt, uint32_t clkn)
+{
+	pkt->clkn = clkn;
+}
+
+void btbb_packet_set_flag(btbb_packet* pkt, int flag, int val)
 {
 	uint32_t mask = 1L << flag;
 	pkt->flags &= ~mask;
@@ -653,7 +676,7 @@ static char *unfec23(char *input, int length)
 static void unwhiten(char* input, char* output, int clock, int length, int skip, btbb_packet* pkt)
 {
 	int count, index;
-	index = INDICES[clock & 0x3f];
+	index = INDICES[(clock >> 1) & 0x3f];
 	index += skip;
 	index %= 127;
 
@@ -1309,7 +1332,7 @@ int btbb_decode(btbb_packet* pkt)
 
 	/* If we were successful, print the packet */
 	if(rv > 0) {
-		printf("Packet decoded with clock 0x%02x (rv=%d)\n", pkt->clkn & 0x3f, rv);
+		printf("Packet decoded with clock 0x%02x (rv=%d)\n", (pkt->clkn >> 1) & 0x3f, rv);
 		btbb_print_packet(pkt);
 	}
 
