@@ -502,9 +502,6 @@ void try_hop(btbb_packet *pkt, btbb_piconet *pn)
 {
 	uint8_t filter_uap = pn->UAP;
 
-	/* Decode packet - fixing clock drift in the process */
-	btbb_decode(pkt);
-
 	if (btbb_piconet_get_flag(pn, BTBB_HOP_REVERSAL_INIT)) {
 		//pn->winnowed = 0;
 		pn->pattern_indices[pn->packets_observed] =
@@ -739,6 +736,11 @@ int btbb_uap_from_header(btbb_packet *pkt, btbb_piconet *pn)
 		btbb_piconet_set_flag(pn, BTBB_CLK6_VALID, 1);
 		btbb_piconet_set_flag(pn, BTBB_UAP_VALID, 1);
 		pn->total_packets_observed = 0;
+
+		if(!survey_mode) {
+			btbb_init_hop_reversal(0, pn);
+			btbb_winnow(pn);
+		}
 		return 1;
 	}
 
