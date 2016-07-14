@@ -119,10 +119,10 @@ int perm5(int z, int p_high, int p_low);
 
 /* determine channel for a particular hop */
 /* replaced with gen_hops() for a complete sequence but could still come in handy */
-char single_hop(int clock, btbb_piconet *pnet);
+char single_hop(int clk1, btbb_piconet *pnet);
 
 /* look up channel for a particular hop */
-char hop(int clock, btbb_piconet *pnet);
+char hop(int clk1, btbb_piconet *pnet);
 
 void try_hop(btbb_packet *pkt, btbb_piconet *pn);
 

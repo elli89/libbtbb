@@ -409,21 +409,21 @@ void get_hop_pattern(btbb_piconet *pn)
 
 /* determine channel for a particular hop */
 /* borrowed from ubertooth firmware to support AFH */
-char single_hop(int clock, btbb_piconet *pn)
+char single_hop(int clk1, btbb_piconet *pn)
 {
 	int a, c, d, x, y1, y2, perm, next_channel;
 	uint32_t base_f, f, f_dash;
 
 	/* following variable names used in section 2.6 of the spec */
-	x = (clock >> 2) & 0x1f;
-	y1 = (clock >> 1) & 0x01;
+	x = (clk1 >> 2) & 0x1f;
+	y1 = (clk1 >> 1) & 0x01;
 	y2 = y1 << 5;
-	a = (pn->a1 ^ (clock >> 21)) & 0x1f;
+	a = (pn->a1 ^ (clk1 >> 21)) & 0x1f;
 	/* b is already defined */
-	c = (pn->c1 ^ (clock >> 16)) & 0x1f;
-	d = (pn->d1 ^ (clock >> 7)) & 0x1ff;
+	c = (pn->c1 ^ (clk1 >> 16)) & 0x1f;
+	d = (pn->d1 ^ (clk1 >> 7)) & 0x1ff;
 	/* e is already defined */
-	base_f = (clock >> 3) & 0x1fffff0;
+	base_f = (clk1 >> 3) & 0x1fffff0;
 	f = base_f % BT_NUM_CHANNELS;
 
 	perm = fast_perm(
@@ -441,9 +441,9 @@ char single_hop(int clock, btbb_piconet *pn)
 }
 
 /* look up channel for a particular hop */
-char hop(int clock, btbb_piconet *pn)
+char hop(int clk1, btbb_piconet *pn)
 {
-	return pn->sequence[clock];
+	return pn->sequence[clk1];
 }
 
 static char aliased_channel(char channel)
@@ -475,7 +475,7 @@ static int init_candidates(char channel, int known_clock_bits, btbb_piconet *pn)
 int btbb_init_hop_reversal(int aliased, btbb_piconet *pn)
 {
 	int max_candidates;
-	uint32_t clock;
+	uint32_t clk1;
 
 	get_hop_pattern(pn);
 
@@ -486,8 +486,8 @@ int btbb_init_hop_reversal(int aliased, btbb_piconet *pn)
 	/* this can hold twice the approximate number of initial candidates */
 	pn->clock_candidates = (uint32_t*) malloc(sizeof(uint32_t) * max_candidates);
 
-	clock = (pn->clk_offset + pn->first_pkt_time) & 0x3f;
-	pn->num_candidates = init_candidates(pn->pattern_channels[0], clock, pn);
+	clk1 = (pn->clk_offset + pn->first_pkt_time) & 0x3f;
+	pn->num_candidates = init_candidates(pn->pattern_channels[0], clk1, pn);
 	pn->winnowed = 0;
 	btbb_piconet_set_flag(pn, BTBB_HOP_REVERSAL_INIT, 1);
 	btbb_piconet_set_flag(pn, BTBB_CLK27_VALID, 0);

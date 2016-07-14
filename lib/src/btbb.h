@@ -88,10 +88,10 @@ void btbb_packet_unref(btbb_packet *pkt);
  * specified, fills lap. 'ac_errors' must be set as an input, replaced
  * by actual number of errors on output. */
 int btbb_find_ac(char *stream,
-	       int search_length,
-	       uint32_t lap,
-	       int max_ac_errors,
-	       btbb_packet **pkt);
+                 int search_length,
+                 uint32_t lap,
+                 int max_ac_errors,
+                 btbb_packet **pkt);
 #define LAP_ANY 0xffffffffUL
 #define UAP_ANY 0xff
 
@@ -114,10 +114,10 @@ uint32_t btbb_packet_get_clkn(const btbb_packet *pkt);
 uint32_t btbb_packet_get_header_packed(const btbb_packet* pkt);
 
 void btbb_packet_set_data(btbb_packet *pkt,
-			  char *syms,      // Symbol data
-			  int length,      // Number of symbols
-			  uint8_t channel, // Bluetooth channel 0-79
-			  uint32_t clkn);  // 312.5us clock (CLK27-0)
+                          char *syms,      // Symbol data
+                          int length,      // Number of symbols
+                          uint8_t channel, // Bluetooth channel 0-79
+                          uint32_t clkn);  // 312.5us clock (CLK27-0)
 
 void btbb_packet_set_symbols(btbb_packet* pkt, char* syms, int length);
 void btbb_packet_set_channel(btbb_packet* pkt, uint8_t channel);

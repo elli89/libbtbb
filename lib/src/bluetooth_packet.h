@@ -112,16 +112,16 @@ struct btbb_packet {
 };
 
 /* type-specific CRC checks and decoding */
-int fhs(int clock, btbb_packet* p);
-int DM(int clock, btbb_packet* p);
-int DH(int clock, btbb_packet* p);
-int EV3(int clock, btbb_packet* p);
-int EV4(int clock, btbb_packet* p);
-int EV5(int clock, btbb_packet* p);
-int HV(int clock, btbb_packet* p);
+int fhs(uint32_t clkn, btbb_packet* p);
+int DM(uint32_t clkn, btbb_packet* p);
+int DH(uint32_t clkn, btbb_packet* p);
+int EV3(uint32_t clkn, btbb_packet* p);
+int EV4(uint32_t clkn, btbb_packet* p);
+int EV5(uint32_t clkn, btbb_packet* p);
+int HV(uint32_t clkn, btbb_packet* p);
 
 /* check if the packet's CRC is correct for a given clock (CLK1-6) */
-int crc_check(int clock, btbb_packet* p);
+int crc_check(uint32_t clkn, btbb_packet* p);
 
 /* format payload for tun interface */
 char *tun_format(btbb_packet* p);
@@ -129,7 +129,7 @@ char *tun_format(btbb_packet* p);
 /* try a clock value (CLK1-6) to unwhiten packet header,
  * sets resultant d_packet_type and d_UAP, returns UAP.
  */
-uint8_t try_clock(int clock, btbb_packet* p);
+uint8_t try_clock(uint32_t clkn, btbb_packet* p);
 
 /* extract LAP from FHS payload */
 uint32_t lap_from_fhs(btbb_packet* p);
